@@ -1,5 +1,7 @@
 <?php
 
+
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -9,11 +11,13 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Joueur;
+use AppBundle\Entity\Personnage;
+use AppBundle\Entity\Stats;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+
 
 /**
  * Description of PlayersController
@@ -69,9 +73,46 @@ class PlayersController extends Controller {
         if ($r->getSession()->has('j' . strval($next))) {
             $r->getSession()->set('actuel', $next);
             return $this->redirectToRoute('createPerso');
-        }else{
+        } else {
             return $this->redirectToRoute('game');
         }
     }
+    /**
+     * 
+     * @Route ("/personnage/create",name="createPerso")
+     *     
+     */
+    public function createPerso(Request $r) {
+        $personnage = new Personnage;
+        $form = $this->createForm("AppBundle\Form\PersonnageType", $personnage);
+        $form->handleRequest($r);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $stats = new Stats();
+            
+            $stats->setPv(
+                    $personnage->getRace()->getStats()->getPv() +
+                    $personnage->getClasse()->getStats->getPv());
+            $stats->setMov(
+                    $personnage->getRace()->getStats()->getMov() +
+                    $personnage->getClasse()->getStats->getMov());
+            $stats->setAtt(
+                    $personnage->getRace()->getStats()->getAtt() +
+                    $personnage->getClasse()->getStats->getAtt());
+            $stats->setDef(
+                    $personnage->getRace()->getStats()->getDef() +
+                    $personnage->getClasse()->getStats->getDef());
+        
+        $em->persist($stats);
+        
+        $personnage->setStats($stats);
+        $em->persist($personnage);
+        $r->getSession()->set('actuel',1);
+                $em->flush();
+    }
+return $this->redirectToRoute('createPerso');
+
+}        
 
 }
+

@@ -155,5 +155,6 @@ class Stats
     {
         return $this->def;
     }
+
 }
 
